@@ -1,0 +1,48 @@
+
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PinkVault v2</title>
+<style>
+body{font-family:Arial;background:linear-gradient(135deg,#0f0f14,#25122c);color:#fff;margin:0;padding:20px}
+.card{max-width:460px;margin:auto;background:rgba(255,255,255,.08);padding:18px;border-radius:20px;border:1px solid #ff63b8}
+input,button{width:100%;padding:10px;border-radius:10px;border:none;margin:6px 0}
+button{background:#ff4fa3;color:#fff;font-weight:bold}
+.barbg{height:18px;background:#333;border-radius:20px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#ff4fa3,#9b6dff)}
+li{margin:5px 0}
+</style></head><body>
+<div class="card">
+<h2>🌸 PinkVault v2</h2>
+<label>🎯 Target Tabungan</label><input id=t type=number>
+<label>💸 Nominal Harian Default</label><input id=d type=number>
+<button onclick="saveSet()">💾 Simpan Pengaturan</button><hr>
+<h3 id=goal></h3><h2 id=total></h2>
+<div class=barbg><div id=bar class=bar></div></div>
+<p id=info></p>
+<input id=amt type=number placeholder="Kosongkan untuk nominal default">
+<button onclick="add()">+ Nabung Hari Ini</button>
+<h3>Riwayat</h3><ul id=list></ul>
+</div>
+<script>
+let s=JSON.parse(localStorage.pvset||'{"target":5000000,"daily":20000}');
+let data=JSON.parse(localStorage.pvdata||"[]");
+function rp(n){return "Rp"+Number(n).toLocaleString("id-ID")}
+function saveSet(){s.target=+t.value||5000000;s.daily=+d.value||20000;localStorage.pvset=JSON.stringify(s);render();}
+function render(){
+t.value=s.target;d.value=s.daily;
+goal.textContent="🎯 "+rp(s.target);
+let tot=data.reduce((a,b)=>a+b.a,0);
+total.textContent=rp(tot);
+let p=Math.min(100,tot/s.target*100);
+bar.style.width=p+"%";
+info.textContent=p.toFixed(1)+"% • Sisa "+rp(Math.max(0,s.target-tot));
+list.innerHTML="";
+[...data].reverse().forEach(x=>{let li=document.createElement("li");li.textContent=x.dt+" • "+rp(x.a);list.append(li);});
+localStorage.pvdata=JSON.stringify(data);localStorage.pvset=JSON.stringify(s);
+}
+function add(){
+let a=+amt.value||s.daily;
+data.push({a:a,dt:new Date().toLocaleDateString("id-ID")});
+amt.value="";render();
+}
+render();
+</script></body></html>
